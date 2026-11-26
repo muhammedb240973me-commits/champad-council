@@ -11,3 +11,16 @@ html {
   font-weight: 900;
   letter-spacing: 0.02em;
 }
+
+/* Fix mobile black/collapsed video frame in html5-qrcode */
+#qr-reader {
+  border: none !important;
+}
+
+#qr-reader video {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 280px;
+  object-fit: cover !important;
+  border-radius: 0.75rem;
+}

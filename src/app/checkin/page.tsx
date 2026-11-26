@@ -638,20 +638,25 @@ export default function CheckinPage() {
             )}
 
             {/* Camera Viewfinder Box */}
+            {/* Camera Viewfinder Box */}
             <div className="mt-4 flex flex-col items-center">
               <div
                 className={`w-full max-w-sm overflow-hidden rounded-2xl border-2 ${
-                  cameraActive
+                  cameraActive || cameraStarting
                     ? "border-emerald-500 bg-black"
                     : "border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/40"
                 }`}
               >
                 <div
                   id="qr-reader"
-                  className={cameraActive ? "w-full min-h-[280px]" : "hidden"}
+                  className={
+                    cameraActive || cameraStarting
+                      ? "w-full min-h-[280px]"
+                      : "hidden"
+                  }
                 />
 
-                {!cameraActive && (
+                {!cameraActive && !cameraStarting && (
                   <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
                     <div className="h-12 w-12 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 mb-3">
                       <Camera className="h-6 w-6" />
@@ -667,6 +672,7 @@ export default function CheckinPage() {
                 )}
               </div>
             </div>
+            
 
             {/* Live Instant Scan Result Card */}
             {scanFeedback && (
