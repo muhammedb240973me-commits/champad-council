@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Councilor {
+  id           String    @id @default(cuid())
+  name         String
+  mobile       String    @unique
+  membershipId String    @unique
+  unit         String
+  position     String    @default("Councilor")
+  isCheckedIn  Boolean   @default(false)
+  checkedInAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
