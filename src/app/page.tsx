@@ -70,7 +70,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 opacity-90">
             <img
-              src="/samastha-logo.jpg"
+              src="/samastha-logo.png"
               alt="Samastha Centenary"
               className="h-7 w-7 sm:h-8 sm:w-8 rounded-md object-cover shadow-sm"
             />
