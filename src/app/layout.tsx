@@ -16,6 +16,11 @@ const cooperFallback = Fraunces({
 export const metadata: Metadata = {
   title: "SSF Champad Sector — Students' Council",
   description: "Delegate Check-in & Council Analytics Portal",
+  icons: {
+    icon: "/jeevithamavuka.png",
+    shortcut: "/jeevithamavuka.png",
+    apple: "/jeevithamavuka.png",
+  },
 };
 
 export default function RootLayout({
