@@ -1,177 +1,249 @@
-import Link from "next/link";
+"use client";
+
+import React, { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import PosterRing from "@/components/PosterRing";
 import {
   Calendar,
-  Clock,
   MapPin,
-  Sparkles,
-  ShieldCheck,
-  Mail,
+  ArrowDown,
+  Smartphone,
   QrCode,
+  AlertCircle,
+  Loader2,
+  Mail,
 } from "lucide-react";
 
-export default function TemporaryHomePage() {
-  return (
-    <div className="min-h-screen flex flex-col bg-[#07070a] text-white selection:bg-pink-500 selection:text-white relative overflow-x-hidden">
-      {/* Ambient Poster-Inspired Gradient Glows */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed -top-32 -left-32 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-gradient-to-tr from-purple-600/20 via-pink-500/15 to-amber-200/15 blur-3xl"
-      />
+export default function HomePage() {
+  const router = useRouter();
+  const lookupSectionRef = useRef<HTMLElement | null>(null);
+  const mobileInputRef = useRef<HTMLInputElement | null>(null);
 
-      {/* Sticky Top Navbar */}
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#07070a]/85 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-cooper text-2xl sm:text-3xl bg-gradient-to-r from-purple-400 via-pink-400 to-amber-200 bg-clip-text text-transparent">
+  const [mobile, setMobile] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const scrollToLookup = () => {
+    lookupSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      mobileInputRef.current?.focus();
+    }, 450);
+  };
+
+  const handleLookupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const cleanMobile = mobile.replace(/\D/g, "");
+    if (cleanMobile.length !== 10) {
+      setError("Please enter a valid 10-digit registered mobile number.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/pass?mobile=${encodeURIComponent(cleanMobile)}`
+      );
+      const data = await res.json();
+
+      if (res.ok && data.councilor?.id) {
+        router.push(`/pass/${data.councilor.id}`);
+      } else {
+        setError(
+          data.error ||
+            "Mobile number not found. Please check the number and try again."
+        );
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#060608] text-white selection:bg-[#e57347] selection:text-black overflow-x-hidden">
+      {/* FIRST COMPLETE VIEW (100dvh on Mobile & Desktop) */}
+      <section className="relative min-h-[100dvh] flex flex-col justify-between px-5 sm:px-8 py-5 max-w-6xl mx-auto">
+        {/* Top Corner Tiny Centenary Logo & Jeevithamaavuka Typo */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 opacity-90">
+            <img
+              src="/samastha-logo.jpg"
+              alt="Samastha Centenary"
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-md object-cover shadow-sm"
+            />
+            <img
+              src="/jeevithamavuka.png"
+              alt="Jeevithamaavuka"
+              className="h-6 sm:h-7 w-auto object-contain invert brightness-95"
+            />
+          </div>
+        </div>
+
+        {/* Center Program Identity & Rolling Round Element */}
+        <div className="my-auto py-4 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-6 sm:gap-10">
+          {/* Continuously Rolling Round Element from Poster */}
+          <div className="flex items-center justify-center shrink-0">
+            <PosterRing className="w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72" />
+          </div>
+
+          {/* Exact Program Details */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            <span className="font-cooper text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-[#e26d42] via-[#ea9663] to-[#f4ca92] bg-clip-text text-transparent leading-none">
               SSF
             </span>
-            <span className="text-base sm:text-lg font-bold tracking-tight text-white">
+
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold tracking-wide text-white/95 mt-1.5">
               Champad Sector
-            </span>
-          </Link>
+            </p>
 
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white transition"
+            <h1 className="mt-2 flex flex-col leading-[0.95]">
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-white/90">
+                Students&apos;
+              </span>
+              <span className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-wider bg-gradient-to-r from-[#e57347] via-[#f0ad78] to-[#f7d7a8] bg-clip-text text-transparent mt-0.5">
+                COUNCIL
+              </span>
+            </h1>
+
+            {/* Date & Venue */}
+            <div className="mt-5 space-y-1.5 text-sm sm:text-base text-white/85">
+              <div className="flex items-center justify-center lg:justify-start gap-2 font-medium">
+                <Calendar className="h-4 w-4 text-[#ea9663] shrink-0" />
+                <span>27 November 2026, Friday</span>
+              </div>
+
+              <div className="flex items-center justify-center lg:justify-start gap-2 font-semibold text-[#f4ca92]">
+                <MapPin className="h-4 w-4 text-[#e26d42] shrink-0" />
+                <span>Erool</span>
+              </div>
+            </div>
+
+            {/* Get Digital Pass CTA Button */}
+            <div className="mt-6 sm:mt-8 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={scrollToLookup}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#e26d42] via-[#ea9663] to-[#f3c48b] hover:brightness-105 active:scale-[0.99] text-[#09090b] font-extrabold text-sm sm:text-base px-7 py-3.5 shadow-[0_0_30px_rgba(229,115,71,0.3)] transition cursor-pointer"
+              >
+                <QrCode className="h-5 w-5" />
+                <span>Get Digital Pass</span>
+                <ArrowDown className="h-4 w-4 animate-bounce" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Subtle Bottom Scroll Cue */}
+        <div className="flex justify-center pt-1">
+          <button
+            type="button"
+            onClick={scrollToLookup}
+            aria-label="Scroll to enter mobile number"
+            className="text-[11px] uppercase tracking-[0.2em] text-white/40 hover:text-white/75 transition cursor-pointer"
           >
-            <ShieldCheck className="h-4 w-4 text-pink-400" />
-            <span>Admin Login</span>
-          </Link>
+            Scroll for Delegate Check-in Pass
+          </button>
         </div>
-      </header>
+      </section>
 
-      {/* Main Hero Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12 sm:py-16 relative z-10">
-        <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left / Main Event Column */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            {/* Coming Soon Pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/30 bg-pink-500/10 px-4 py-1.5 text-xs sm:text-sm font-medium text-pink-200">
-              <Sparkles className="h-4 w-4 text-pink-400" />
-              <span>Delegate Pass Portal — Coming Soon</span>
+      {/* SECOND SECTION: MOBILE NUMBER LOOKUP */}
+      <section
+        id="pass-lookup"
+        ref={lookupSectionRef}
+        className="relative px-5 sm:px-8 py-16 sm:py-24 border-t border-white/10 bg-gradient-to-b from-[#060608] via-[#0d0c10] to-[#060608]"
+      >
+        <div className="max-w-md mx-auto">
+          <div className="rounded-3xl border border-white/15 bg-white/[0.04] backdrop-blur-md p-6 sm:p-8 shadow-2xl">
+            <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-gradient-to-br from-[#e26d42]/20 to-[#f4ca92]/20 border border-[#ea9663]/30 text-[#f4ca92] mx-auto mb-4">
+              <Smartphone className="h-6 w-6" />
             </div>
 
-            {/* Event Titles */}
-            <div className="space-y-2">
-              <p className="text-sm sm:text-base font-semibold uppercase tracking-[0.2em] text-purple-300">
-                SSF Champad Sector
-              </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-white via-pink-200 to-amber-200 bg-clip-text text-transparent">
-                  Students&apos; Council
-                </span>
-              </h1>
-              <p className="text-lg sm:text-xl font-medium text-white/80 pt-1">
-                സെക്ടർ സ്റ്റുഡൻസ് കൗൺസിൽ
-              </p>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-white">
+              Delegate Digital Pass
+            </h2>
+            <p className="text-xs sm:text-sm text-white/60 text-center mt-1.5">
+              Enter your registered 10-digit mobile number to open your unique
+              QR entry pass.
+            </p>
 
-            {/* Speaker Highlight Card */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:p-5 backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-wider text-pink-300 font-semibold">
-                Keynote Address • സംസാരം
-              </p>
-              <p className="text-lg sm:text-xl font-bold text-white mt-1">
-                Sayyid Muneer Ahdal Thangal
-              </p>
-              <p className="text-sm text-white/70">
-                സയ്യിദ് മുനീർ അഹദൽ തങ്ങൾ — President, SSF Kerala
-              </p>
-            </div>
-
-            {/* Date, Time & Venue Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="flex items-center justify-center lg:justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <Calendar className="h-5 w-5 text-purple-400 shrink-0" />
-                <div className="text-left">
-                  <p className="text-[11px] uppercase text-white/50">Date</p>
-                  <p className="text-sm font-semibold">27 Nov 2026</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center lg:justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <Clock className="h-5 w-5 text-pink-400 shrink-0" />
-                <div className="text-left">
-                  <p className="text-[11px] uppercase text-white/50">Time</p>
-                  <p className="text-sm font-semibold">05:00 PM</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center lg:justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <MapPin className="h-5 w-5 text-amber-300 shrink-0" />
-                <div className="text-left">
-                  <p className="text-[11px] uppercase text-white/50">Venue</p>
-                  <p className="text-sm font-semibold">Erul (ഏരുൽ)</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Geometric Poster Art & Delegate Status Box */}
-          <div className="lg:col-span-5">
-            <div className="relative rounded-3xl border border-white/15 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-6 sm:p-8 shadow-2xl overflow-hidden">
-              {/* Decorative Poster-Style Gradient Blocks */}
-              <div className="flex items-end gap-2 mb-6" aria-hidden="true">
-                <div className="h-10 w-14 rounded-lg bg-gradient-to-tr from-purple-600 to-pink-400 opacity-90" />
-                <div className="h-14 w-12 rounded-lg bg-gradient-to-tr from-pink-500 to-amber-200 opacity-90" />
-                <div className="h-8 w-16 rounded-lg bg-gradient-to-r from-amber-200 to-purple-500 opacity-85" />
-                <div className="h-12 w-10 rounded-lg bg-gradient-to-b from-pink-300 to-amber-100 opacity-85" />
-              </div>
-
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-pink-400/30 flex items-center justify-center mb-4">
-                <QrCode className="h-6 w-6 text-pink-300" />
-              </div>
-
-              <h2 className="text-xl font-bold text-white">
-                Digital Check-in Pass
-              </h2>
-              <p className="text-sm text-white/70 mt-2 leading-relaxed">
-                Councilors will soon be able to download their unique QR event
-                pass here using their registered mobile number.
-              </p>
-
-              <div className="mt-6 pt-5 border-t border-white/10 flex flex-col gap-3">
-                <div className="flex items-center justify-between text-xs text-white/60">
-                  <span>Portal Status</span>
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-amber-300">
-                    <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
-                    Launching Soon
-                  </span>
-                </div>
-
-                <Link
-                  href="/admin"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:opacity-95 px-4 py-3 text-sm font-semibold text-white shadow-lg transition"
+            <form onSubmit={handleLookupSubmit} className="mt-6 space-y-4">
+              <div>
+                <label
+                  htmlFor="delegate-mobile"
+                  className="block text-xs font-semibold uppercase tracking-wider text-white/70 mb-2"
                 >
-                  <ShieldCheck className="h-4 w-4" />
-                  Organizer &amp; Admin Portal
-                </Link>
+                  Registered Mobile Number
+                </label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-sm font-semibold text-white/45 select-none">
+                    +91
+                  </span>
+                  <input
+                    id="delegate-mobile"
+                    ref={mobileInputRef}
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    required
+                    value={mobile}
+                    onChange={(e) => {
+                      setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
+                      if (error) setError("");
+                    }}
+                    placeholder="Enter 10-digit mobile number"
+                    className="w-full rounded-xl border border-white/15 bg-black/50 pl-12 pr-4 py-3.5 text-base font-medium tracking-wider text-white placeholder:text-white/30 placeholder:tracking-normal focus:border-[#ea9663] focus:outline-none transition"
+                  />
+                </div>
               </div>
-            </div>
+
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs sm:text-sm text-rose-200">
+                  <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e26d42] via-[#ea9663] to-[#f3c48b] hover:brightness-105 disabled:opacity-60 text-[#09090b] font-bold py-3.5 text-sm sm:text-base shadow-lg transition cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Fetching Your Pass...</span>
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="h-5 w-5" />
+                    <span>View My Digital Pass</span>
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Footer matching Poster Contact Info */}
-      <footer className="border-t border-white/10 py-6 px-4 sm:px-6 relative z-10">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-white/60">
+      {/* Clean Public Footer (No Admin Links) */}
+      <footer className="border-t border-white/10 py-6 px-5 sm:px-8">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/55">
           <div className="flex items-baseline gap-2">
-            <span className="font-cooper text-lg text-white">SSF</span>
-            <span className="font-bold text-white tracking-wide">
+            <span className="font-cooper text-base text-white">SSF</span>
+            <span className="font-bold tracking-wider text-white">
               CHAMPAD SECTOR
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-5">
             <a
               href="mailto:ssfchampadsector@gmail.com"
               className="inline-flex items-center gap-1.5 hover:text-white transition"
             >
-              <Mail className="h-4 w-4 text-pink-400" />
+              <Mail className="h-3.5 w-3.5 text-[#ea9663]" />
               <span>ssfchampadsector@gmail.com</span>
             </a>
 
@@ -182,7 +254,7 @@ export default function TemporaryHomePage() {
               className="inline-flex items-center gap-1.5 hover:text-white transition"
             >
               <svg
-                className="h-4 w-4 text-purple-400"
+                className="h-3.5 w-3.5 text-[#e26d42]"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

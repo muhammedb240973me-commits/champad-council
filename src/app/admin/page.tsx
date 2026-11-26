@@ -124,6 +124,9 @@ export default function AdminAnalyticsPage() {
       ``,
       `*Unit-wise Status:*`,
       unitLines,
+      ``,
+      ``,
+      `© SSF Champad Sector`,
     ].join("\n");
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;

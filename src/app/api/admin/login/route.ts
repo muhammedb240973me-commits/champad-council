@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const { userId, password } = await request.json();
 
     const validUser = process.env.ADMIN_USERID || "admin";
-    const validPass = process.env.ADMIN_PASSWORD || "ssfchampad2026";
+    const validPass = process.env.ADMIN_PASSWORD || "ssfchampad313";
 
     if (userId === validUser && password === validPass) {
       const cookieStore = await cookies();

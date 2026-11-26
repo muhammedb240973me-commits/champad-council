@@ -2,6 +2,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html {
+  scroll-behavior: smooth;
+}
+
 .font-cooper {
   font-family: "Cooper Black", "Cooper Std", var(--font-cooper-fallback), Georgia, serif;
   font-weight: 900;

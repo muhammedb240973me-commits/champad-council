@@ -29,8 +29,8 @@ const DEFAULT_UNITS = [
   "Arayakool",
   "Quraishikkara",
   "Manekkara",
-  "South Pannainoor",
-  "Pannainoor",
+  "South Panniyannur",
+  "Panniyannur",
 ];
 
 interface CouncilorRow {
