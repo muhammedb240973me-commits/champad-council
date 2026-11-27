@@ -381,40 +381,6 @@ export default function DelegateDataPage() {
               </option>
             ))}
           </select>
-
-          {!showAddUnit ? (
-            <button
-              type="button"
-              onClick={() => setShowAddUnit(true)}
-              className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
-            >
-              + New Unit
-            </button>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
-                value={customUnitInput}
-                onChange={(e) => setCustomUnitInput(e.target.value)}
-                placeholder="Enter unit name"
-                className="rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-1.5 text-xs focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleAddCustomUnit}
-                className="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold cursor-pointer"
-              >
-                Add
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddUnit(false)}
-                className="px-2 py-1.5 text-xs text-slate-500 cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
         </div>
 
         {selectedUnitFilter !== "ALL" && (
