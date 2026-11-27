@@ -12,7 +12,16 @@ import {
   AlertCircle,
   Loader2,
   Mail,
+  Users,
+  ChevronRight,
 } from "lucide-react";
+
+interface MatchedCouncilor {
+  id: string;
+  name: string;
+  unit: string;
+  position: string;
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -22,6 +31,9 @@ export default function HomePage() {
   const [mobile, setMobile] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [matchedCouncilors, setMatchedCouncilors] = useState<
+    MatchedCouncilor[]
+  >([]);
 
   const scrollToLookup = () => {
     lookupSectionRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,6 +45,7 @@ export default function HomePage() {
   const handleLookupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setMatchedCouncilors([]);
 
     const cleanMobile = mobile.replace(/\D/g, "");
     if (cleanMobile.length !== 10) {
@@ -47,8 +60,12 @@ export default function HomePage() {
       );
       const data = await res.json();
 
-      if (res.ok && data.councilor?.id) {
-        router.push(`/pass/${data.councilor.id}`);
+      if (res.ok && Array.isArray(data.councilors)) {
+        if (data.councilors.length === 1) {
+          router.push(`/pass/${data.councilors[0].id}`);
+        } else {
+          setMatchedCouncilors(data.councilors);
+        }
       } else {
         setError(
           data.error ||
@@ -192,6 +209,8 @@ export default function HomePage() {
                     onChange={(e) => {
                       setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
                       if (error) setError("");
+                      if (matchedCouncilors.length > 0)
+                        setMatchedCouncilors([]);
                     }}
                     placeholder="Enter 10-digit mobile number"
                     className="w-full rounded-xl border border-white/15 bg-black/50 pl-12 pr-4 py-3.5 text-base font-medium tracking-wider text-white placeholder:text-white/30 placeholder:tracking-normal focus:border-[#ea9663] focus:outline-none transition"
@@ -206,24 +225,67 @@ export default function HomePage() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e26d42] via-[#ea9663] to-[#f3c48b] hover:brightness-105 disabled:opacity-60 text-[#09090b] font-bold py-3.5 text-sm sm:text-base shadow-lg transition cursor-pointer"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>Fetching Your Pass...</span>
-                  </>
-                ) : (
-                  <>
-                    <QrCode className="h-5 w-5" />
-                    <span>View My Digital Pass</span>
-                  </>
-                )}
-              </button>
+              {matchedCouncilors.length === 0 && (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e26d42] via-[#ea9663] to-[#f3c48b] hover:brightness-105 disabled:opacity-60 text-[#09090b] font-bold py-3.5 text-sm sm:text-base shadow-lg transition cursor-pointer"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Fetching Your Pass...</span>
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="h-5 w-5" />
+                      <span>View My Digital Pass</span>
+                    </>
+                  )}
+                </button>
+              )}
             </form>
+
+            {/* One-Tap Selector when Multiple Delegates Share the Same Number */}
+            {matchedCouncilors.length > 1 && (
+              <div className="mt-5 pt-5 border-t border-white/10 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#f4ca92]">
+                  <Users className="h-4 w-4 text-[#ea9663] shrink-0" />
+                  <span>
+                    {matchedCouncilors.length} Delegates Registered — Tap Your
+                    Name
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {matchedCouncilors.map((person) => (
+                    <button
+                      key={person.id}
+                      type="button"
+                      onClick={() => router.push(`/pass/${person.id}`)}
+                      className="w-full group flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/[0.05] hover:border-[#ea9663] hover:bg-[#ea9663]/10 p-3.5 text-left transition cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="h-4 w-4 rounded-full border-2 border-white/40 group-hover:border-[#ea9663] group-hover:bg-[#ea9663] shrink-0 transition" />
+                        <div className="truncate">
+                          <p className="text-sm sm:text-base font-bold text-white truncate">
+                            {person.name}
+                          </p>
+                          <p className="text-xs text-white/65 truncate mt-0.5">
+                            {person.unit} •{" "}
+                            <span className="text-[#f4ca92]">
+                              {person.position}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <ChevronRight className="h-4 w-4 text-white/40 group-hover:text-[#f4ca92] shrink-0 transition" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -47,22 +47,50 @@ export async function POST(request: Request) {
       const mobile = String(row.mobile || "").replace(/\D/g, "").slice(-10);
       const unit = String(row.unit || "").trim();
       const position = String(row.position || "Councilor").trim() || "Councilor";
+      const rowId = row.tempId ? String(row.tempId).trim() : "";
 
       if (!name || mobile.length < 10 || !unit) continue;
 
+      // 1. Check if this exact row ID already exists in DB
+      const existingById = rowId
+        ? await prisma.councilor.findUnique({ where: { id: rowId } })
+        : null;
+
+      if (existingById) {
+        await prisma.councilor.update({
+          where: { id: existingById.id },
+          data: { name, mobile, unit, position },
+        });
+        savedCount++;
+        continue;
+      }
+
+      // 2. Check if the same person (same mobile + same name) already exists
+      const existingSamePerson = await prisma.councilor.findFirst({
+        where: {
+          mobile,
+          name: { equals: name, mode: "insensitive" },
+        },
+      });
+
+      if (existingSamePerson) {
+        await prisma.councilor.update({
+          where: { id: existingSamePerson.id },
+          data: { name, unit, position },
+        });
+        savedCount++;
+        continue;
+      }
+
+      // 3. Otherwise create a new delegate (allows multiple delegates with same mobile)
+      const uniqueSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
       const generatedMembershipId =
         row.membershipId && String(row.membershipId).trim()
           ? String(row.membershipId).trim()
-          : `SSF-${mobile.slice(-6)}`;
+          : `SSF-${mobile.slice(-4)}-${uniqueSuffix}`;
 
-      await prisma.councilor.upsert({
-        where: { mobile },
-        update: {
-          name,
-          unit,
-          position,
-        },
-        create: {
+      await prisma.councilor.create({
+        data: {
           name,
           mobile,
           membershipId: generatedMembershipId,

@@ -10,7 +10,7 @@ datasource db {
 model Councilor {
   id           String    @id @default(cuid())
   name         String
-  mobile       String    @unique
+  mobile       String    
   membershipId String    @unique
   unit         String
   position     String    @default("Councilor")
@@ -18,4 +18,6 @@ model Councilor {
   checkedInAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  @@index([mobile])
 }

@@ -42,8 +42,9 @@ export async function GET(request: Request) {
         );
       }
 
-      const councilor = await prisma.councilor.findUnique({
+      const councilors = await prisma.councilor.findMany({
         where: { mobile: cleanMobile },
+        orderBy: { name: "asc" },
         select: {
           id: true,
           name: true,
@@ -56,17 +57,17 @@ export async function GET(request: Request) {
         },
       });
 
-      if (!councilor) {
+      if (councilors.length === 0) {
         return NextResponse.json(
           {
             error:
-              "Mobile number not registered. Please contact the registration desk.",
+              "Mobile number not registered. Please contact your Unit Secretary or the registration desk.",
           },
           { status: 404 }
         );
       }
 
-      return NextResponse.json({ councilor });
+      return NextResponse.json({ councilors });
     }
 
     return NextResponse.json(
